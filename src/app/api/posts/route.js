@@ -231,13 +231,23 @@ export async function POST(req) {
             };
         }
 
-        // Fallback meta description from excerpt or first 160 chars of content (stripped)
+        // Helpers for meta generation
         const deriveMeta = (str) => (str || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        const generateKeywords = (t = '', c = '') => {
+            const stop = new Set(['the', 'a', 'an', 'and', 'or', 'of', 'to', 'in', 'on', 'for', 'with', 'by', 'is', 'are', 'this', 'that', 'it', 'as', 'at', 'be', 'from']);
+            const text = `${t} ${deriveMeta(c)}`.toLowerCase();
+            const terms = Array.from(new Set(text.split(/[^a-z0-9]+/g).filter(w => w && !stop.has(w))));
+            return terms.slice(0, 10);
+        }
+
+        // Compute defaults respecting custom overrides
+        const computedMetaTitle = (metaTitle && metaTitle.trim()) ? metaTitle.trim().slice(0, 60) : (title || '').trim().slice(0, 60);
         const computedMetaDescription = (metaDescription && metaDescription.trim())
             ? metaDescription.trim().slice(0, 160)
             : (excerpt && excerpt.trim())
                 ? deriveMeta(excerpt).slice(0, 160)
                 : deriveMeta(content).slice(0, 160);
+        const computedKeywords = (Array.isArray(keywords) && keywords.length > 0) ? keywords : generateKeywords(title, content);
 
         const post = await prisma.post.create({
             data: {
@@ -248,9 +258,9 @@ export async function POST(req) {
                 categoryId: validCategoryId,
                 images: Array.isArray(images) ? images : [],
                 featuredImage,
-                metaTitle,
+                metaTitle: computedMetaTitle,
                 metaDescription: computedMetaDescription,
-                keywords: keywords || [],
+                keywords: computedKeywords,
                 domainId,
                 status,
                 author: session.user.name || 'User',

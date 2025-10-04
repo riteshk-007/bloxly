@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import slugify from 'slug';
 import { getServerSession } from 'next-auth';
 import prisma from '../../../../../lib/prisma';
 import { deleteR2ObjectByKey, keyFromPublicUrl, normalizePublicUrl } from '../../../../../lib/r2';
@@ -62,6 +63,23 @@ export async function PUT(req, { params }) {
         const tagIds = Array.isArray(body.tagIds) ? body.tagIds.filter(Boolean) : [];
         const tags = Array.isArray(body.tags) ? body.tags : [];
 
+        // Derive meta if not explicitly provided
+        const deriveMeta = (str) => (str || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        const generateKeywords = (t = '', c = '') => {
+            const stop = new Set(['the', 'a', 'an', 'and', 'or', 'of', 'to', 'in', 'on', 'for', 'with', 'by', 'is', 'are', 'this', 'that', 'it', 'as', 'at', 'be', 'from']);
+            const text = `${t} ${deriveMeta(c)}`.toLowerCase();
+            const terms = Array.from(new Set(text.split(/[^a-z0-9]+/g).filter(w => w && !stop.has(w))));
+            return terms.slice(0, 10);
+        }
+
+        const computedMetaTitle = (body.metaTitle && body.metaTitle.trim()) ? body.metaTitle.trim().slice(0, 60) : (body.title || '').trim().slice(0, 60);
+        const computedMetaDescription = (body.metaDescription && body.metaDescription.trim())
+            ? body.metaDescription.trim().slice(0, 160)
+            : (body.excerpt && body.excerpt.trim())
+                ? deriveMeta(body.excerpt).slice(0, 160)
+                : deriveMeta(body.content).slice(0, 160);
+        const computedKeywords = (Array.isArray(keywords) && keywords.length > 0) ? keywords : generateKeywords(body.title, body.content);
+
         const data = {
             title: body.title,
             content: body.content,
@@ -69,9 +87,9 @@ export async function PUT(req, { params }) {
             featuredImage: body.featuredImage || null,
             images,
             status: body.status,
-            metaTitle: body.metaTitle || null,
-            metaDescription: body.metaDescription || null,
-            keywords,
+            metaTitle: computedMetaTitle,
+            metaDescription: computedMetaDescription,
+            keywords: computedKeywords,
             publishedAt: body.status === 'PUBLISHED' && !body.publishedAt ? new Date() : body.publishedAt,
         };
 
@@ -137,6 +155,27 @@ export async function PUT(req, { params }) {
         });
         if (!existing) {
             return NextResponse.json({ error: 'Post not found or unauthorized' }, { status: 404 });
+        }
+
+        // Handle slug updates: use provided slug or derive from title
+        if (typeof body.slug === 'string' || typeof body.title === 'string') {
+            const desired = (typeof body.slug === 'string' && body.slug.trim())
+                ? body.slug
+                : (typeof body.title === 'string' ? body.title : existing.title);
+            const newSlug = slugify(desired, { lower: true });
+            if (newSlug && newSlug !== existing.slug) {
+                const conflict = await prisma.post.findFirst({
+                    where: {
+                        slug: newSlug,
+                        domainId: existing.domainId,
+                        NOT: { id: existing.id }
+                    }
+                });
+                if (conflict) {
+                    return NextResponse.json({ error: 'Another post with this URL slug exists in this domain' }, { status: 409 });
+                }
+                data.slug = newSlug;
+            }
         }
 
         // If featured image is being replaced/cleared, try to delete previous R2 object (best-effort)
