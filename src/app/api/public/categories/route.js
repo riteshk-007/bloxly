@@ -14,12 +14,19 @@ export async function GET(req) {
     }
 
     try {
+        // Categories are user-scoped in schema; expose only those that are used by this domain
         const categories = await prisma.category.findMany({
+            where: {
+                userId: auth.domain.userId,
+                posts: {
+                    some: { domainId: auth.domain.id, status: 'PUBLISHED' }
+                }
+            },
             include: {
                 _count: {
                     select: {
                         posts: {
-                            where: { status: 'PUBLISHED' }
+                            where: { status: 'PUBLISHED', domainId: auth.domain.id }
                         }
                     }
                 }

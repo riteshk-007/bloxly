@@ -1,118 +1,75 @@
-// CREATE NEW FILE: src/app/sitemap.xml/route.js
-
 import { NextResponse } from 'next/server';
-import { getCategoriesInternal, getPostsInternal } from '../../../../../lib/blog-api';
+import { validateApiKey } from '../../../../../lib/api-auth';
+import prisma from '../../../../../lib/prisma';
 
-// ✅ CRITICAL: Force dynamic rendering
+// This public API returns JSON sitemap data for the authenticated domain via x-api-key
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+export async function GET(req) {
+    const auth = await validateApiKey(req);
 
-    console.log('🔄 Generating sitemap dynamically...');
+    if (!auth.valid) {
+        return NextResponse.json(
+            { error: auth.error },
+            { status: auth.status }
+        );
+    }
 
     try {
-        // Fetch fresh data from database
-        const [postsData, categoriesData] = await Promise.all([
-            getPostsInternal({ page: 1, limit: 1000 }),
-            getCategoriesInternal(),
+        const domainId = auth.domain.id;
+        const userId = auth.domain.userId;
+
+        const [posts, categories, tags] = await Promise.all([
+            prisma.post.findMany({
+                where: { domainId, status: 'PUBLISHED' },
+                select: { slug: true, updatedAt: true, publishedAt: true },
+                orderBy: { updatedAt: 'desc' },
+                take: 2000,
+            }),
+            prisma.category.findMany({
+                where: {
+                    userId,
+                    posts: { some: { domainId, status: 'PUBLISHED' } },
+                },
+                select: { slug: true, updatedAt: true },
+                orderBy: { slug: 'asc' },
+                take: 2000,
+            }),
+            prisma.tag.findMany({
+                where: {
+                    posts: { some: { domainId, status: 'PUBLISHED' } },
+                },
+                select: { slug: true },
+                orderBy: { slug: 'asc' },
+                take: 2000,
+            }),
         ]);
 
-        const urls = [];
+        const payload = {
+            baseUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+            generatedAt: new Date().toISOString(),
+            counts: {
+                posts: posts.length,
+                categories: categories.length,
+                tags: tags.length,
+            },
+            posts,
+            categories,
+            tags,
+        };
 
-        // Static pages
-        const staticPages = [
-            { url: baseUrl, priority: '1.0', changefreq: 'yearly' },
-            { url: `${baseUrl}/blog`, priority: '0.9', changefreq: 'daily' },
-            { url: `${baseUrl}/dashboard`, priority: '0.9', changefreq: 'monthly' },
-            { url: `${baseUrl}/auth/signin`, priority: '0.6', changefreq: 'monthly' },
-        ];
-
-        staticPages.forEach(page => {
-            urls.push({
-                loc: page.url,
-                lastmod: new Date().toISOString(),
-                changefreq: page.changefreq,
-                priority: page.priority,
-            });
-        });
-
-        // Add blog posts
-        let postCount = 0;
-        if (postsData?.posts && Array.isArray(postsData.posts)) {
-            postsData.posts.forEach((post) => {
-                urls.push({
-                    loc: `${baseUrl}/blog/${post.slug}`,
-                    lastmod: new Date(post.updatedAt || post.publishedAt).toISOString(),
-                    changefreq: 'weekly',
-                    priority: '0.8',
-                });
-                postCount++;
-            });
-        }
-
-        // Add categories
-        let categoryCount = 0;
-        if (categoriesData?.categories && Array.isArray(categoriesData.categories)) {
-            categoriesData.categories.forEach((category) => {
-                urls.push({
-                    loc: `${baseUrl}/blog/category/${category.slug}`,
-                    lastmod: new Date().toISOString(),
-                    changefreq: 'weekly',
-                    priority: '0.7',
-                });
-                categoryCount++;
-            });
-        }
-
-        console.log(`✅ Sitemap generated: ${urls.length} total URLs (${postCount} posts, ${categoryCount} categories)`);
-
-        // Generate XML
-        const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(url => `  <url>
-    <loc>${url.loc}</loc>
-    <lastmod>${url.lastmod}</lastmod>
-    <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>
-  </url>`).join('\n')}
-</urlset>`;
-
-        return new NextResponse(sitemap, {
-            status: 200,
+        return NextResponse.json(payload, {
             headers: {
-                'Content-Type': 'application/xml; charset=utf-8',
-                // NO CACHING - always fresh
+                // Always fresh for clients; they can revalidate client-side as needed
                 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
             },
         });
-
     } catch (error) {
-        console.error('❌ Sitemap generation failed:', error);
-
-        // Minimal fallback
-        const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/blog</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-</urlset>`;
-
-        return new NextResponse(fallbackSitemap, {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/xml; charset=utf-8',
-            },
-        });
+        console.error('❌ Public sitemap JSON generation failed:', error);
+        return NextResponse.json(
+            { error: 'Failed to generate sitemap data' },
+            { status: 500 }
+        );
     }
 }
