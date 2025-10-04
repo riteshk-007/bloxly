@@ -5,6 +5,6 @@ export default function robots() {
             allow: '/',
             disallow: ['/admin/', '/api/'],
         },
-        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/sitemap.xml`,
+        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app'}/sitemap.xml`,
     };
 }

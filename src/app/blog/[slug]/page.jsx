@@ -11,13 +11,13 @@ import { Breadcrumbs } from '../../../components/Breadcrumbs';
 export async function generateMetadata({ params }) {
     try {
         const { post } = await getPost(params.slug);
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in';
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app';
         const year = new Date().getFullYear();
         const computedTitle = post.metaTitle || post.title;
 
         // Example normalization for known comparison posts
         const title = /laravel\s*vs\s*node/i.test(computedTitle)
-            ? `Laravel vs Node.js: Which is Best for Web Development in ${year}?`
+            ? `Your Blog Title ${year}?`
             : computedTitle;
 
         let description = post.metaDescription || post.excerpt || '';
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
         return {
             title,
             description,
-            keywords: Array.isArray(post.keywords) ? post.keywords : ['blog', 'codexprime'],
+            keywords: Array.isArray(post.keywords) ? post.keywords : ['blog', 'Bloxly', 'articles', 'posts'],
             authors: post.author ? [{ name: post.author }] : undefined,
             alternates: { canonical: url },
             openGraph: {
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }) {
                 url,
                 title,
                 description,
-                siteName: 'CodeXprime',
+                siteName: 'Bloxly',
                 images,
                 publishedTime: post.publishedAt || undefined,
                 modifiedTime: post.updatedAt || undefined,

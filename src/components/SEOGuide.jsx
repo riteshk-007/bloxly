@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function SEOGuide() {
     const { data: session, status } = useSession();
@@ -65,10 +67,21 @@ export default function SEOGuide() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-white">SEO Guide — Easy & Practical 🚀</h1>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center text-gray-300 hover:text-white bg-gray-800/60 border border-gray-700 px-3 py-2 rounded-lg"
+                        title="Back to Dashboard"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back
+                    </Link>
+                    <h1 className="text-3xl font-bold text-white">SEO Guide — Easy & Practical 🚀</h1>
+                </div>
             </div>
 
+            {/* Domain selector (visible when you have more than one domain) */}
             {domains.length > 1 && (
                 <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                     <label className="block text-gray-300 text-sm font-medium mb-2">Select Domain:</label>
@@ -83,6 +96,20 @@ export default function SEOGuide() {
                             </option>
                         ))}
                     </select>
+                </div>
+            )}
+
+            {/* If user has no domains, show a friendly helper instead of an empty screen on some tabs */}
+            {domains.length === 0 && (
+                <div className="bg-yellow-500/10 border border-yellow-700 rounded-lg p-4">
+                    <p className="text-yellow-400">
+                        You don’t have any domains yet. Add a domain first to unlock API keys and integration steps.
+                    </p>
+                    <div className="mt-3">
+                        <Link href="/dashboard/domains" className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-semibold">
+                            Go to Domains
+                        </Link>
+                    </div>
                 </div>
             )}
 
@@ -145,17 +172,8 @@ export default function SEOGuide() {
                                     <pre className="text-sm text-green-400">{`# Public site base URL
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 # Public Blog API (optional if same host)
-NEXT_PUBLIC_BLOG_API_URL=https://your-domain.com
+NEXT_PUBLIC_BLOG_API_URL=https://bloxly.vercel.app
 NEXT_PUBLIC_BLOG_API_KEY=${domain.apiKey}
-
-# Cloudflare R2 (media CDN)
-CLOUDFLARE_ACCOUNT_ID=xxxxx
-CLOUDFLARE_BUCKET_NAME=blogs-media
-CLOUDFLARE_R2_PUBLIC_HOST=pub-${'${CLOUDFLARE_ACCOUNT_ID}'}.r2.dev
-CLOUDFLARE_R2_PATH_STYLE=bucket
-
-# Optional: TinyPNG for pre-compressing images
-TINYPNG_API_KEY=your_tinypng_key
 
 # Analytics
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX`}</pre>
@@ -170,21 +188,21 @@ import { getPost } from '@/lib/blog-api';
 
 export async function generateMetadata({ params }): Promise<Metadata> {
   const { post } = await getPost(params.slug);
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com';
   const year = new Date().getFullYear();
   const title = /laravel\\s*vs\\s*node/i.test(post.title)
-    ? 'Laravel vs Node.js: Which is Best for Web Development in ' + year + '?'
+    ? 'Your Blog Title  ' + year + '?'
     : (post.metaTitle || post.title);
 
   return {
     title,
     description: post.metaDescription || post.excerpt,
-    keywords: ['laravel','nodejs','web development','php','javascript'],
+    keywords: ['blog', 'blogs'],
     openGraph: {
       title: post.title,
       description: post.excerpt,
       url: baseUrl + '/blog/' + params.slug,
-      siteName: 'CodeXprime',
+      siteName: 'Your Site Name',
       images: post.featuredImage ? [{ url: post.featuredImage, width: 1200, height: 630 }] : [],
       type: 'article',
       publishedTime: post.publishedAt,
@@ -219,6 +237,16 @@ export async function generateMetadata({ params }): Promise<Metadata> {
                         </div>
                     )}
 
+                    {activeTab === 'integration' && !domain && (
+                        <div className="space-y-4">
+                            <h2 className="text-2xl font-bold text-white mb-2">Integration</h2>
+                            <p className="text-gray-300">Select a domain to view API keys and copy‑paste snippets.</p>
+                            <Link href="/dashboard/domains" className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-semibold">
+                                Add a Domain
+                            </Link>
+                        </div>
+                    )}
+
                     {activeTab === 'domains' && domain && (
                         <div className="space-y-6">
                             <h2 className="text-2xl font-bold text-white mb-4">Domain‑specific details</h2>
@@ -242,6 +270,16 @@ export async function generateMetadata({ params }): Promise<Metadata> {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'domains' && !domain && (
+                        <div className="space-y-4">
+                            <h2 className="text-2xl font-bold text-white mb-2">Domain Setup</h2>
+                            <p className="text-gray-300">You’ll see your API key and domain info here after you add a domain.</p>
+                            <Link href="/dashboard/domains" className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-semibold">
+                                Go to Domains
+                            </Link>
                         </div>
                     )}
 
@@ -284,6 +322,13 @@ export default async function sitemap() {
 }`}</pre>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'sitemap' && !domain && (
+                        <div className="space-y-4">
+                            <h2 className="text-2xl font-bold text-white mb-2">Sitemap & robots</h2>
+                            <p className="text-gray-300">Select a domain to generate domain‑aware URLs in the examples.</p>
                         </div>
                     )}
 

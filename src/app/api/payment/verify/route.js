@@ -45,13 +45,22 @@ export async function POST(req) {
             }, { status: 404 })
         }
 
-        // Update subscription status
+        // Calculate new end date based on plan type
+        const endDate = new Date()
+        if (subscription.planType === 'PAID_MONTHLY') {
+            endDate.setDate(endDate.getDate() + 28)
+        } else if (subscription.planType === 'CUSTOM_30DAYS') {
+            endDate.setDate(endDate.getDate() + 30)
+        }
+
+        // Update subscription status to ACTIVE
         const updatedSubscription = await prisma.subscription.update({
             where: { id: subscription.id },
             data: {
                 status: 'ACTIVE',
                 razorpayPaymentId: razorpay_payment_id,
-                startDate: new Date()
+                startDate: new Date(),
+                endDate
             }
         })
 

@@ -52,15 +52,35 @@ export default function SubscriptionPage() {
                         amount: data.amount,
                         currency: data.currency,
                         order_id: data.orderId,
-                        name: 'BlogMaster',
+                        name: 'Bloxly',
                         description: `${planType} Plan Subscription`,
                         theme: {
                             color: '#EAB308' // Yellow color
                         },
-                        handler: function (response) {
-                            // Payment successful
-                            alert('✅ Payment Successful! Your subscription has been upgraded.');
-                            fetchSubscription(); // Refresh data
+                        handler: async function (response) {
+                            // Payment successful - verify on server
+                            try {
+                                const verifyRes = await fetch('/api/payment/verify', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature
+                                    })
+                                })
+
+                                const verifyData = await verifyRes.json()
+                                if (verifyRes.ok && verifyData.success) {
+                                    alert('✅ Payment verified! Subscription activated.')
+                                    fetchSubscription()
+                                } else {
+                                    alert('⚠️ Payment captured but verification failed: ' + (verifyData.error || 'Unknown error'))
+                                }
+                            } catch (err) {
+                                console.error('Verify error:', err)
+                                alert('⚠️ Payment captured but verification call failed')
+                            }
                         },
                         prefill: {
                             email: session?.user?.email || '',
@@ -68,7 +88,7 @@ export default function SubscriptionPage() {
                         },
                         modal: {
                             ondismiss: function () {
-                                console.log('Payment modal closed');
+                                alert('Payment cancelled')
                             }
                         }
                     };
@@ -76,6 +96,10 @@ export default function SubscriptionPage() {
                     // Check if Razorpay is loaded
                     if (typeof window.Razorpay !== 'undefined') {
                         const rzp = new window.Razorpay(options);
+                        rzp.on('payment.failed', function (resp) {
+                            console.error('Payment failed:', resp)
+                            alert('❌ Payment failed')
+                        })
                         rzp.open();
                     } else {
                         // Fallback: Load Razorpay script and then open
@@ -83,6 +107,10 @@ export default function SubscriptionPage() {
                         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
                         script.onload = () => {
                             const rzp = new window.Razorpay(options);
+                            rzp.on('payment.failed', function (resp) {
+                                console.error('Payment failed:', resp)
+                                alert('❌ Payment failed')
+                            })
                             rzp.open();
                         };
                         document.body.appendChild(script);
@@ -251,8 +279,8 @@ export default function SubscriptionPage() {
                     <div className="bg-gray-800 rounded-lg p-6 border border-gray-600">
                         <div className="text-center">
                             <h3 className="text-lg font-semibold text-white mb-2">Custom 30 Days</h3>
-                            <p className="text-3xl font-bold text-yellow-500 mb-4">Custom</p>
-                            <p className="text-gray-400 text-sm mb-4">For specific projects</p>
+                            <p className="text-3xl font-bold text-yellow-500 mb-1">₹69</p>
+                            <p className="text-gray-400 text-sm mb-4">30 days validity</p>
                         </div>
                         <ul className="space-y-2 mb-6">
                             <li className="flex items-center text-gray-300">
@@ -278,7 +306,7 @@ export default function SubscriptionPage() {
                             className="w-full bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-600 text-black font-semibold py-2 px-4 rounded-lg transition-colors"
                         >
                             {subscription?.planType === 'CUSTOM_30DAYS' ? 'Current Plan' :
-                                upgradeLoading ? 'Processing...' : 'Contact Us'}
+                                upgradeLoading ? 'Processing...' : 'Upgrade Now'}
                         </button>
                     </div>
                 </div>

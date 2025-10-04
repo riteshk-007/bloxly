@@ -4,6 +4,7 @@ import prisma from '../../../../lib/prisma';
 import { normalizePublicUrl } from '../../../../lib/r2';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { revalidatePath } from 'next/cache';
 
 export async function GET(req) {
     const session = await getServerSession(authOptions);
@@ -264,6 +265,8 @@ export async function POST(req) {
                 }
             }
         });
+
+        revalidatePath('/sitemap.js');
 
         return NextResponse.json(post, { status: 201 });
     } catch (error) {

@@ -75,13 +75,11 @@ export default function DashboardPage() {
     const handleAddDomain = async (e) => {
         e.preventDefault()
         try {
-            const response = await fetch('/api/admin/domains', {
+            // Use the user domains API (requires active subscription)
+            const response = await fetch('/api/user/domains', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...newDomain,
-                    userId: session.user.id
-                })
+                body: JSON.stringify(newDomain)
             })
 
             if (response.ok) {
@@ -97,40 +95,9 @@ export default function DashboardPage() {
         }
     }
 
-    const handleUpgrade = async () => {
-        try {
-            const response = await fetch('/api/payment/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ planType: 'PAID_MONTHLY' })
-            })
-
-            if (response.ok) {
-                const { orderId, amount, currency, key } = await response.json()
-
-                const options = {
-                    key,
-                    amount,
-                    currency,
-                    order_id: orderId,
-                    name: 'Blog Management System',
-                    description: 'Monthly Subscription',
-                    handler: function (response) {
-                        alert('Payment successful!')
-                        fetchUserData()
-                    },
-                    prefill: {
-                        email: session.user.email,
-                        name: session.user.name,
-                    },
-                }
-
-                const rzp = new window.Razorpay(options)
-                rzp.open()
-            }
-        } catch (error) {
-            console.error('Payment error:', error)
-        }
+    // Route users to the dedicated subscription page for upgrades
+    const handleUpgrade = () => {
+        window.location.href = '/dashboard/subscription'
     }
 
     if (status === 'loading' || loading) {

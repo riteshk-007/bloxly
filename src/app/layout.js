@@ -7,37 +7,37 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app'),
   title: {
-    default: 'CodeXprime — Multi‑Domain Blog Management',
-    template: '%s | CodeXprime'
+    default: 'Bloxly — Multi‑Domain Blog Management',
+    template: '%s | Bloxly'
   },
-  description: 'Create SEO‑optimized blogs across multiple domains with CodeXprime.',
-  keywords: ['CodeXprime', 'blog management', 'multi-domain', 'SEO', 'content management'],
-  authors: [{ name: 'CodeXprime' }],
-  creator: 'CodeXprime',
+  description: 'Create SEO‑optimized blogs across multiple domains with Bloxly.',
+  keywords: ['Bloxly', 'blog management', 'multi-domain', 'SEO', 'content management'],
+  authors: [{ name: 'Bloxly' }],
+  creator: 'Bloxly',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in',
-    title: 'CodeXprime — Multi‑Domain Blog Management',
-    description: 'Create SEO‑optimized blogs across multiple domains with CodeXprime.',
-    siteName: 'CodeXprime',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app',
+    title: 'Bloxly — Multi‑Domain Blog Management',
+    description: 'Create SEO‑optimized blogs across multiple domains with Bloxly.',
+    siteName: 'Bloxly',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'CodeXprime'
+        alt: 'Bloxly'
       }
     ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CodeXprime — Multi‑Domain Blog Management',
-    description: 'Create SEO‑optimized blogs across multiple domains with CodeXprime.',
+    title: 'Bloxly — Multi‑Domain Blog Management',
+    description: 'Create SEO‑optimized blogs across multiple domains with Bloxly.',
     images: ['/twitter-image.jpg'],
-    creator: '@codexprime'
+    creator: '@bloxly'
   },
   robots: {
     index: true,

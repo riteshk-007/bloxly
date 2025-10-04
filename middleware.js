@@ -7,6 +7,11 @@ export default withAuth(
         const isAdmin = token?.role === "ADMIN"
         const isUser = token?.role === "USER" || token?.role === "ADMIN"
 
+
+        if (token && req.nextUrl.pathname === "/auth/signin") {
+            return NextResponse.redirect(new URL("/dashboard", req.url))
+        }
+
         // Admin routes protection
         if (req.nextUrl.pathname.startsWith("/admin")) {
             if (!isAdmin) {

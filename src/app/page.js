@@ -154,9 +154,7 @@ export default function Home() {
           <div className='grid md:grid-cols-3 gap-8 max-w-6xl mx-auto'>
             <div className='bg-gradient-to-br from-gray-900/90 to-black/80 border border-gray-800 rounded-3xl p-8'>
               <h3 className='text-2xl font-bold text-white mb-4'>Free</h3>
-              <div className='text-4xl font-bold text-yellow-400 mb-6'>
-                <span className='text-lg text-gray-400'>/month</span>
-              </div>
+              <div className='text-4xl font-bold text-yellow-400 mb-6'>₹0<span className='text-lg text-gray-400'>/month</span></div>
               <ul className='space-y-4 mb-8'>
                 <li className='flex items-center text-gray-300'>
                   <CheckCircle className='w-5 h-5 text-green-400 mr-3' />
@@ -176,9 +174,7 @@ export default function Home() {
                 POPULAR
               </div>
               <h3 className='text-2xl font-bold text-white mb-4'>Pro</h3>
-              <div className='text-4xl font-bold text-yellow-400 mb-6'>
-                <span className='text-lg text-gray-400'>/month</span>
-              </div>
+              <div className='text-4xl font-bold text-yellow-400 mb-6'>₹49<span className='text-lg text-gray-400'>/month</span></div>
               <ul className='space-y-4 mb-8'>
                 <li className='flex items-center text-gray-300'>
                   <CheckCircle className='w-5 h-5 text-green-400 mr-3' />
@@ -195,9 +191,7 @@ export default function Home() {
             </div>
             <div className='bg-gradient-to-br from-gray-900/90 to-black/80 border border-gray-800 rounded-3xl p-8'>
               <h3 className='text-2xl font-bold text-white mb-4'>Custom</h3>
-              <div className='text-4xl font-bold text-yellow-400 mb-6'>
-                +<span className='text-lg text-gray-400'>/month</span>
-              </div>
+              <div className='text-4xl font-bold text-yellow-400 mb-6'>₹69<span className='text-lg text-gray-400'>/30 days</span></div>
               <ul className='space-y-4 mb-8'>
                 <li className='flex items-center text-gray-300'>
                   <CheckCircle className='w-5 h-5 text-green-400 mr-3' />

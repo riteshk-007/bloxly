@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import prisma from '../../../../../lib/prisma';
 import { deleteR2ObjectByKey, keyFromPublicUrl, normalizePublicUrl } from '../../../../../lib/r2';
+import { revalidatePath } from 'next/cache';
 
 import { authOptions } from '../../auth/[...nextauth]/route';
 function extractImageUrls(html) {
@@ -194,7 +195,7 @@ export async function PUT(req, { params }) {
                 } catch { /* ignore */ }
             }
         } catch { /* ignore */ }
-
+        revalidatePath('/sitemap.js');
         return NextResponse.json(post);
     } catch (error) {
         // Log full error for debugging in dev
@@ -249,7 +250,7 @@ export async function DELETE(req, { params }) {
                 } catch { /* ignore */ }
             }
         } catch { /* ignore */ }
-
+        revalidatePath('/sitemap.js');
         return NextResponse.json({ message: 'Post deleted' });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });

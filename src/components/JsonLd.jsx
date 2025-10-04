@@ -5,7 +5,7 @@ export function ArticleJsonLd({ post }) {
         '@graph': [
             {
                 '@type': 'Article',
-                '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/blog/${post.slug}/#article`,
+                '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/blog/${post.slug}/#article`,
                 headline: post.title,
                 description: post.excerpt,
                 image: post.featuredImage
@@ -23,40 +23,40 @@ export function ArticleJsonLd({ post }) {
                         '@type': 'Person',
                         name: post.author,
                         url: post.authorSlug
-                            ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/author/${post.authorSlug}`
+                            ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/author/${post.authorSlug}`
                             : undefined,
                     }
                     : undefined,
                 publisher: {
                     '@type': 'Organization',
-                    name: 'CodeXprime',
+                    name: 'Bloxly',
                     logo: {
                         '@type': 'ImageObject',
-                        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/logo.png`,
+                        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/logo.png`,
                     },
                 },
                 mainEntityOfPage: {
                     '@type': 'WebPage',
-                    '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/blog/${post.slug}/`,
+                    '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/blog/${post.slug}/`,
                 },
                 wordCount: post.wordCount,
                 articleSection: post?.category?.name || post.category,
             },
             {
                 '@type': 'BreadcrumbList',
-                '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/blog/${post.slug}/#breadcrumb`,
+                '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/blog/${post.slug}/#breadcrumb`,
                 itemListElement: [
                     {
                         '@type': 'ListItem',
                         position: 1,
                         name: 'Home',
-                        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}`,
+                        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}`,
                     },
                     {
                         '@type': 'ListItem',
                         position: 2,
                         name: 'Blog',
-                        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/blog`,
+                        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/blog`,
                     },
                     {
                         '@type': 'ListItem',
@@ -67,13 +67,13 @@ export function ArticleJsonLd({ post }) {
             },
             {
                 '@type': 'WebSite',
-                '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/#website`,
-                url: process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in',
-                name: 'CodeXprime',
-                description: 'IT Services in Delhi',
+                '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/#website`,
+                url: process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/',
+                name: 'Bloxly',
+                description: 'Multi-Domain Blog Management',
                 potentialAction: {
                     '@type': 'SearchAction',
-                    target: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in'}/search?q={search_term_string}`,
+                    target: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app/'}/search?q={search_term_string}`,
                     'query-input': 'required name=search_term_string',
                 },
             },

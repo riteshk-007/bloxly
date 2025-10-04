@@ -4,13 +4,13 @@ import { format } from 'date-fns';
 import { getPostsInternal, getCategoriesInternal } from '../../../lib/blog-api';
 
 export const metadata = {
-    title: 'Blog | CodeXprime',
-    description: 'Latest blog posts and tech guides from CodeXprime.',
-    alternates: { canonical: (process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in') + '/blog' },
+    title: 'Blog | Bloxly',
+    description: 'Latest blog posts and tech guides from Bloxly.',
+    alternates: { canonical: (process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app') + '/blog' },
     openGraph: {
-        title: 'Blog | CodeXprime',
-        description: 'Latest blog posts and tech guides from CodeXprime.',
-        url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://codexprime.in') + '/blog',
+        title: 'Blog | Bloxly',
+        description: 'Latest blog posts and tech guides from Bloxly.',
+        url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://bloxly.vercel.app') + '/blog',
         type: 'website'
     },
 };

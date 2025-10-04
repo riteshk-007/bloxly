@@ -1,13 +1,26 @@
-import { getPostsInternal, getCategories } from '../../lib/blog-api';
+import { getPostsInternal, getCategoriesInternal } from '../../lib/blog-api';
+import prisma from '../../lib/prisma';
+
+// Make sitemap dynamic and refreshed periodically (avoid static at build time)
+export const dynamic = 'force-dynamic';
+export const revalidate = 60; // seconds
 
 export default async function sitemap() {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
     try {
-        // Fetch all published posts and categories
-        const [postsData, categories] = await Promise.all([
-            getPostsInternal({ page: 1, limit: 1000 }), // Get all posts
-            getCategories(),
+        // Server-side DB reads (no external fetch during build)
+        const [postsData, categoriesResult, tags] = await Promise.all([
+            getPostsInternal({ page: 1, limit: 1000 }),
+            getCategoriesInternal(),
+            prisma.tag.findMany({
+                where: {
+                    posts: {
+                        some: { status: 'PUBLISHED' }
+                    }
+                },
+                select: { slug: true }
+            })
         ]);
 
         const urls = [
@@ -52,7 +65,8 @@ export default async function sitemap() {
         }
 
         // Add category pages
-        if (categories) {
+        const categories = categoriesResult?.categories || []
+        if (categories.length) {
             categories.forEach((category) => {
                 urls.push({
                     url: `${baseUrl}/blog/category/${category.slug}`,
@@ -61,6 +75,18 @@ export default async function sitemap() {
                     priority: 0.7,
                 });
             });
+        }
+
+        // Add tag pages
+        if (tags?.length) {
+            tags.forEach((tag) => {
+                urls.push({
+                    url: `${baseUrl}/blog/tag/${tag.slug}`,
+                    lastModified: new Date(),
+                    changeFrequency: 'weekly',
+                    priority: 0.6,
+                })
+            })
         }
 
         // Tags optional; if you later need tags, fetch via API layer to avoid coupling
