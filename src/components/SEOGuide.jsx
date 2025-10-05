@@ -154,6 +154,25 @@ export default function SEOGuide() {
                                     </ul>
                                 </div>
                             </div>
+
+                            <div className="bg-gray-800 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold text-white mb-3">Highlights endpoint</h3>
+                                <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                                    <pre className="text-sm text-cyan-400">{`GET /api/public/highlights?limit=5&sort=mix
+-> [{ id, title, excerpt, slug, views, publishedAt, featuredImage }]
+
+Sort: newest | popular | mix (default)
+Limit: 1..50 (default 5)
+
+Client helper (lib/blog-api.ts):
+export async function getHighlights({ limit = 5, sort = 'mix' } = {}) {
+  const q = new URLSearchParams();
+  q.append('limit', String(limit));
+  q.append('sort', sort);
+  return blogFetch('/api/public/highlights?' + q.toString(), { next: { revalidate: 60 } });
+}`}</pre>
+                                </div>
+                            </div>
                         </div>
                     )}
 

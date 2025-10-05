@@ -63,7 +63,7 @@ export default function Home() {
       </main>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-gray-900/30 relative">
+      <section id="features" className="py-20 bg-gradient-to-b from-black to-gray-900/30 relative">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -142,7 +142,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className='py-32 bg-gradient-to-b from-gray-900/50 to-black relative'>
+      <section id="pricing" className='py-32 bg-gradient-to-b from-gray-900/50 to-black relative'>
         <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='text-center mb-20'>
             <h2 className='text-5xl md:text-6xl font-bold mb-8'>

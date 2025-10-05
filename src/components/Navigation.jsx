@@ -3,11 +3,17 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Code, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Navigation() {
     const { data: session, status } = useSession();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    // Avoid hydration mismatch by rendering a deterministic shell until mounted
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <nav className="bg-black/95 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
@@ -26,9 +32,12 @@ export default function Navigation() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-8">
-
-
-                        {status === 'loading' ? (
+                        {!mounted ? (
+                            <>
+                                <div className="animate-pulse bg-gray-700 h-8 w-20 rounded" />
+                                <div className="animate-pulse bg-gray-700 h-8 w-28 rounded" />
+                            </>
+                        ) : status === 'loading' ? (
                             <div className="animate-pulse bg-gray-700 h-8 w-20 rounded"></div>
                         ) : session ? (
                             <>
@@ -68,7 +77,12 @@ export default function Navigation() {
                             <a href="#pricing" className="block px-3 py-2 text-gray-300 hover:text-yellow-400 transition-colors">Pricing</a>
                             <Link href="/blog" className="block px-3 py-2 text-gray-300 hover:text-yellow-400 transition-colors">Blog</Link>
 
-                            {session ? (
+                            {!mounted ? (
+                                <>
+                                    <div className="animate-pulse h-10 bg-gray-800 rounded-md" />
+                                    <div className="animate-pulse h-10 bg-gray-800 rounded-md" />
+                                </>
+                            ) : session ? (
                                 <>
                                     <Link href="/dashboard" className="block px-3 py-2 text-gray-300 hover:text-yellow-400 transition-colors">
                                         Dashboard
