@@ -3,6 +3,9 @@ import { validateApiKey } from '../../../../../../lib/api-auth';
 import prisma from '../../../../../../lib/prisma';
 import { normalizePublicUrl } from '../../../../../../lib/r2';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 
 export async function GET(
     req,
@@ -92,6 +95,7 @@ export async function GET(
         }, {
             headers: {
                 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+                'Vary': 'x-api-key',
             }
         });
     } catch (error) {

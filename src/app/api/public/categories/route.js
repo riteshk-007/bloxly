@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { validateApiKey } from '../../../../../lib/api-auth';
 import prisma from '../../../../../lib/prisma';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 
 export async function GET(req) {
     const auth = await validateApiKey(req);
@@ -37,6 +40,7 @@ export async function GET(req) {
         return NextResponse.json({ categories }, {
             headers: {
                 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
+                'Vary': 'x-api-key',
             }
         });
     } catch (error) {

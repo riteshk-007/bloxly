@@ -30,7 +30,7 @@ export async function GET(req) {
         });
 
         return NextResponse.json({ tags }, {
-            headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200' },
+            headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200', 'Vary': 'x-api-key' },
         });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch tags' }, { status: 500 });

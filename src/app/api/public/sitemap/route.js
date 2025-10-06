@@ -63,6 +63,7 @@ export async function GET(req) {
             headers: {
                 // Always fresh for clients; they can revalidate client-side as needed
                 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+                'Vary': 'x-api-key',
             },
         });
     } catch (error) {
